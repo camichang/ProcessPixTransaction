@@ -16,6 +16,10 @@ public class PixTransactionRequest {
     @Size(min = 1, max = 255)
     private String pixKey;
 
+    @NotNull
+    @Positive
+    private BigDecimal amount;
+
     public String getId() {
         return id;
     }
@@ -40,9 +44,6 @@ public class PixTransactionRequest {
         this.amount = amount;
     }
 
-    @NotNull
-    @Positive
-    private BigDecimal amount;
 
 
 }

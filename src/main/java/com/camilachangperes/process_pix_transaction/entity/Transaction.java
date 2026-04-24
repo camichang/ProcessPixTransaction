@@ -1,15 +1,16 @@
 package com.camilachangperes.process_pix_transaction.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
+
+import java.util.UUID;
 
 @Entity
 public class Transaction {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id", nullable = false)
-    private String id;
+    private UUID id;
 
     @Column(name = "pix_key", nullable = false)
     private String pixKey;
@@ -44,11 +45,11 @@ public class Transaction {
         this.pixKey = pixKey;
     }
 
-    public String getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 }

@@ -21,6 +21,9 @@ public class Transaction {
     @Column(name = "status", nullable = false)
     private String status;
 
+    public Transaction(){
+    }
+
     public String getStatus() {
         return status;
     }

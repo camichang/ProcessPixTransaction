@@ -1,31 +1,26 @@
 package com.camilachangperes.process_pix_transaction.event;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import java.util.UUID;
 
-@Entity
 public class TransactionEvent {
 
-    @Id
-    @Column(name = "id", nullable = false)
-    private String id;
-
-    @Column(name = "pix_key", nullable = false)
+    private UUID id;
     private String pixKey;
-
-    @Column(name = "amount", nullable = false)
     private String amount;
-
-
-    @Column(name = "status", nullable = false)
     private String status;
 
-    public String getId() {
+    public TransactionEvent(UUID id, String pixKey, String amount, String status) {
+        this.id = id;
+        this.pixKey = pixKey;
+        this.amount = amount;
+        this.status = status;
+    }
+
+    public UUID getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 

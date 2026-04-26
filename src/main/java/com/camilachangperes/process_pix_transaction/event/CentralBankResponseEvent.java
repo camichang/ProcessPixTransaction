@@ -3,20 +3,12 @@ package com.camilachangperes.process_pix_transaction.event;
 import java.math.BigDecimal;
 import java.util.UUID;
 
-public class TransactionEvent {
+public class CentralBankResponseEvent {
 
-    private UUID id;
-    private String pixKey;
-    private BigDecimal amount;
-    private String status;
-
-    public String getPixKey() {
-        return pixKey;
-    }
-
-    public void setPixKey(String pixKey) {
-        this.pixKey = pixKey;
-    }
+        private UUID id;
+        private String pixKey;
+        private BigDecimal amount;
+        private String status;
 
     public UUID getId() {
         return id;
@@ -24,6 +16,14 @@ public class TransactionEvent {
 
     public void setId(UUID id) {
         this.id = id;
+    }
+
+    public String getPixKey() {
+        return pixKey;
+    }
+
+    public void setPixKey(String pixKey) {
+        this.pixKey = pixKey;
     }
 
     public BigDecimal getAmount() {
@@ -42,12 +42,13 @@ public class TransactionEvent {
         this.status = status;
     }
 
-    public TransactionEvent(UUID id, String pixKey, BigDecimal amount, String status) {
+    public void CentralBankResponseEvent(UUID id, String pixKey, BigDecimal amount, String status) {
         this.id = id;
         this.pixKey = pixKey;
         this.amount = amount;
         this.status = status;
-
     }
+
+
 
 }

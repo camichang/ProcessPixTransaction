@@ -24,7 +24,7 @@ public class TransactionEventListener {
             System.out.println("Transaction not found for ID: " + event.getId());
         }
 
-        System.out.println("Received Transaction Event: " + event.getId() + "" +
+        System.out.println("Received Transaction Event: " + event.getId() + " " +
                 ", PixKey: " + event.getPixKey() + ", Amount: " + event.getAmount() + ", Status: " + event.getStatus());
     }
 }

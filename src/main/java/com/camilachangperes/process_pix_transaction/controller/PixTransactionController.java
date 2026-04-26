@@ -1,6 +1,7 @@
 package com.camilachangperes.process_pix_transaction.controller;
 
 import com.camilachangperes.process_pix_transaction.dto.PixTransactionRequest;
+import com.camilachangperes.process_pix_transaction.entity.Transaction;
 import com.camilachangperes.process_pix_transaction.service.PixTransactionService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,10 +19,9 @@ public class PixTransactionController {
     private PixTransactionService pixTransactionService;
 
     @PostMapping("/pay")
-    public ResponseEntity<String>
-    paypix(@Valid @RequestBody PixTransactionRequest request){
+    public ResponseEntity<String> paypix(@Valid @RequestBody PixTransactionRequest request){
 
-        pixTransactionService.processPixTransaction(request);
+        Transaction transaction = pixTransactionService.processPixTransaction(request);
 
         return ResponseEntity.ok(
                 "Pix transaction processed successfully: pixKey: " + request.getPixKey() + ", amount: " + request.getAmount());

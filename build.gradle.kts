@@ -24,6 +24,7 @@ dependencies {
 	implementation("org.flywaydb:flyway-core")
 	implementation("org.springframework:spring-jdbc")
 	implementation("org.springframework.kafka:spring-kafka")
+    implementation("org.springframework.boot:spring-boot-starter-websocket")
 
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 

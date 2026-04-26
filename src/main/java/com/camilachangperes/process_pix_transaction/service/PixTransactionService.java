@@ -10,11 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
-
-import java.math.BigDecimal;
-import java.util.UUID;
 
 @Service
 public class PixTransactionService {
@@ -29,40 +25,45 @@ public class PixTransactionService {
     ApplicationEventPublisher eventPublisher;
 
     @Autowired
-    TransactionEvent transactionEvent;
+    FraudService fraudService;
 
     @Value("${app.pix.transaction.topic}")
     private String topic;
 
     private static final Logger logger = LoggerFactory.getLogger(PixTransactionService.class);
 
-    public void processPixTransaction(PixTransactionRequest request) {
-        savePixTransaction(request.getPixKey(), request.getAmount()); //valida e salva no banco de dados
+    public Transaction processPixTransaction(PixTransactionRequest request) {
+        // Valida os dados
+        pixTransactionValidator.validatePixKey(request.getPixKey(), request.getAmount());
 
-        var saved = savePixTransaction(request.getPixKey(), request.getAmount());
+        // Cria a transação inicial com status PENDING
+        Transaction transaction = new Transaction();
+        transaction.setPixKey(request.getPixKey());
+        transaction.setAmount(request.getAmount().toString());
+        transaction.setStatus("PENDING");
 
+        Transaction saved = transactionRepository.save(transaction);
+        logger.info("Transaction created with ID: {} and status: {}", saved.getId(), saved.getStatus());
+
+        // Verifica fraude usando FraudService
+        boolean approved = fraudService.isApproved(request.getAmount(), request.getPixKey());
+        if (!approved) {
+            saved.setStatus("REPROVED_FRAUD");
+            transactionRepository.save(saved);
+            logger.warn("Transaction {} reproved by fraud check. PixKey={}, Amount={}", saved.getId(), saved.getPixKey(), saved.getAmount());
+            return saved;
+        }
+
+        // Se aprovado, publica evento para o MQ
         eventPublisher.publishEvent(new TransactionEvent(
                 saved.getId(),
                 saved.getPixKey(),
-                saved.getAmount(),
+                request.getAmount(),
                 saved.getStatus()
-        )); //envia a mensagem para o topico do evento
+        ));
+        logger.info("Transaction {} approved by fraud check and published to MQ", saved.getId());
+
+        return saved;
     }
-
-    private Transaction savePixTransaction(String pixKey, BigDecimal amount) {
-        pixTransactionValidator.validatePixKey(pixKey, amount);
-
-        Transaction transaction = new Transaction();
-        transaction.setPixKey(pixKey);
-        transaction.setAmount(amount.toString());
-        transaction.setStatus("PENDING");
-
-        var savedTransaction = transactionRepository.save(transaction);
-        logger.info("Transaction processed successfully: {}", transaction.getId());
-
-       return savedTransaction; //salva a transação no banco de dados e retorna a entidade salva
-
-    }
-
-
 }
+

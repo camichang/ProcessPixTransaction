@@ -8,7 +8,7 @@ public class CentralBankResponseEvent {
         private UUID id;
         private String pixKey;
         private BigDecimal amount;
-        private String status;
+        private Enum status;
 
     public UUID getId() {
         return id;
@@ -34,15 +34,15 @@ public class CentralBankResponseEvent {
         this.amount = amount;
     }
 
-    public String getStatus() {
+    public Enum getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(Enum status) {
         this.status = status;
     }
 
-    public void CentralBankResponseEvent(UUID id, String pixKey, BigDecimal amount, String status) {
+    public void CentralBankResponseEvent(UUID id, String pixKey, BigDecimal amount, Enum status) {
         this.id = id;
         this.pixKey = pixKey;
         this.amount = amount;

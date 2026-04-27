@@ -1,4 +1,4 @@
-package com.camilachangperes.process_pix_transaction.entity;
+package com.camilachangperes.process_pix_transaction.model;
 
 import jakarta.persistence.*;
 
@@ -19,16 +19,16 @@ public class Transaction {
     private String amount;
 
     @Column(name = "status", nullable = false)
-    private String status;
+    private Enum status;
 
     public Transaction(){
     }
 
-    public String getStatus() {
+    public Enum getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(Enum status) {
         this.status = status;
     }
 

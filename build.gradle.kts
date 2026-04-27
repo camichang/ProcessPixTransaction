@@ -31,7 +31,8 @@ dependencies {
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("io.projectreactor:reactor-test")
 	testImplementation("org.springframework.kafka:spring-kafka-test")
-	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+	testImplementation("org.mockito:mockito-core:5.11.0")
+	testImplementation("org.junit.jupiter:junit-jupiter-api:5.12.2")
 
     runtimeOnly("com.h2database:h2")
 }

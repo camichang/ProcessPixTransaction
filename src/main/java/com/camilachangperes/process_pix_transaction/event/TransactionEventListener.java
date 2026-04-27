@@ -1,5 +1,6 @@
 package com.camilachangperes.process_pix_transaction.event;
 
+import com.camilachangperes.process_pix_transaction.model.StatusTransaction;
 import com.camilachangperes.process_pix_transaction.repository.TransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
@@ -18,7 +19,7 @@ public class TransactionEventListener {
         var transactionOpt = transactionRepository.findById(event.getId());
         if (transactionOpt.isPresent()) {
             var transaction = transactionOpt.get();
-            transaction.setStatus("APPROVED");
+            transaction.setStatus(StatusTransaction.APPROVED);
             transactionRepository.save(transaction);
         } else {
             System.out.println("Transaction not found for ID: " + event.getId());

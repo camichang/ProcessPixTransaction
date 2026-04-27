@@ -8,7 +8,7 @@ public class TransactionEvent {
     private UUID id;
     private String pixKey;
     private BigDecimal amount;
-    private String status;
+    private Enum status;
 
     public String getPixKey() {
         return pixKey;
@@ -34,15 +34,15 @@ public class TransactionEvent {
         this.amount = amount;
     }
 
-    public String getStatus() {
+    public Enum getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(Enum status) {
         this.status = status;
     }
 
-    public TransactionEvent(UUID id, String pixKey, BigDecimal amount, String status) {
+    public TransactionEvent(UUID id, String pixKey, BigDecimal amount, Enum status) {
         this.id = id;
         this.pixKey = pixKey;
         this.amount = amount;

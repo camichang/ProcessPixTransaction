@@ -1,7 +1,7 @@
 package com.camilachangperes.process_pix_transaction.controller;
 
 import com.camilachangperes.process_pix_transaction.dto.PixTransactionRequest;
-import com.camilachangperes.process_pix_transaction.entity.Transaction;
+import com.camilachangperes.process_pix_transaction.model.Transaction;
 import com.camilachangperes.process_pix_transaction.service.PixTransactionService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;

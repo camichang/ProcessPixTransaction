@@ -42,7 +42,7 @@ public class CentralBankResponseListener {
                 message = "Transaction was rejected. Please check your account status or contact support.";
             } else {
                 clientStatus = StatusTransaction.APPROVED;
-                message = "Transaction was successfully.";
+                message = "Transaction was successful.";
             }
 
             logger.info("Updated transaction {} with status: {}", transaction.getId(), transaction.getStatus());

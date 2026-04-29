@@ -19,16 +19,16 @@ public class Transaction {
     private String amount;
 
     @Column(name = "status", nullable = false)
-    private Enum status;
+    private StatusTransaction status;
 
     public Transaction(){
     }
 
-    public Enum getStatus() {
+    public StatusTransaction getStatus() {
         return status;
     }
 
-    public void setStatus(Enum status) {
+    public void setStatus(StatusTransaction status) {
         this.status = status;
     }
 

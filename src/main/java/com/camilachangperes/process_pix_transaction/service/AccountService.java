@@ -14,15 +14,17 @@ public class AccountService {
 
     public AccountService() {
         // contas simuladas para teste
-        accounts.put("pixKey1", new Account(java.util.UUID.randomUUID(), new BigDecimal("1000.00"), false));
-        accounts.put("pixKey2", new Account(java.util.UUID.randomUUID(), new BigDecimal("500.00"), false));
+        accounts.put("teste1@teste.com", new Account(java.util.UUID.randomUUID(), new BigDecimal("30000.00"), false));
+        accounts.put("123456789ab", new Account(java.util.UUID.randomUUID(), new BigDecimal("500.00"), false));
         accounts.put("pixKey3", new Account(java.util.UUID.randomUUID(), new BigDecimal("200.00"), true)); // conta bloqueada
     }
 
     //verifica se tem saldo suficiente
     public boolean hasSufficientBalance(String pixKey, BigDecimal amount) {
         Account account = accounts.get(pixKey);
-        return account != null && account.getBalance().compareTo(amount) >= 0;
+        return account != null
+                && amount.compareTo(BigDecimal.ZERO) > 0
+                && account.getBalance().compareTo(amount) >= 0;
     }
 
     //verifica se a conta esta bloqueada

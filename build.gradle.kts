@@ -33,6 +33,7 @@ dependencies {
 	testImplementation("org.springframework.kafka:spring-kafka-test")
 	testImplementation("org.mockito:mockito-core:5.11.0")
 	testImplementation("org.junit.jupiter:junit-jupiter-api:5.12.2")
+    testImplementation("io.github.hakky54:logcaptor:2.9.0")
 
     runtimeOnly("com.h2database:h2")
 }

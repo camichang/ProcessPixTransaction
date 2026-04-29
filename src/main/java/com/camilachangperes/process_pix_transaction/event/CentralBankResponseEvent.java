@@ -1,5 +1,7 @@
 package com.camilachangperes.process_pix_transaction.event;
 
+import com.camilachangperes.process_pix_transaction.model.StatusTransaction;
+
 import java.math.BigDecimal;
 import java.util.UUID;
 
@@ -8,7 +10,7 @@ public class CentralBankResponseEvent {
         private UUID id;
         private String pixKey;
         private BigDecimal amount;
-        private Enum status;
+        private StatusTransaction status;
 
     public UUID getId() {
         return id;
@@ -34,15 +36,15 @@ public class CentralBankResponseEvent {
         this.amount = amount;
     }
 
-    public Enum getStatus() {
+    public StatusTransaction getStatus() {
         return status;
     }
 
-    public void setStatus(Enum status) {
+    public void setStatus(StatusTransaction status) {
         this.status = status;
     }
 
-    public void CentralBankResponseEvent(UUID id, String pixKey, BigDecimal amount, Enum status) {
+    public void CentralBankResponseEvent(UUID id, String pixKey, BigDecimal amount, StatusTransaction status) {
         this.id = id;
         this.pixKey = pixKey;
         this.amount = amount;

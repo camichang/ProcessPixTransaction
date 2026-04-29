@@ -1,0 +1,98 @@
+{
+  "info": {
+    "_postman_id": "28521421-d52a-4f7e-bbe0-a6b8dc5ed480",
+    "name": "CreatedTransaction",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "51864372",
+    "_collection_link": "https://go.postman.co/collection/51864372-28521421-d52a-4f7e-bbe0-a6b8dc5ed480?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Request - chavepix2",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"pixKey\": \"teste1@teste.com\",\r\n    \"amount\": \"100.00\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/pix/pay",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "pix",
+            "pay"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Request - chavepix1",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"pixKey\": \"teste1@teste.com\",\r\n    \"amount\": \"10.00\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/pix/pay",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "pix",
+            "pay"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Request - chavepix3 conta bloqueada",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"pixKey\": \"teste1@teste.com\",\r\n    \"amount\": \"10.00\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/pix/pay",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "pix",
+            "pay"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}

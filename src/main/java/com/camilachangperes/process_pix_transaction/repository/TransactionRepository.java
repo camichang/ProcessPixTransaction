@@ -1,6 +1,6 @@
 package com.camilachangperes.process_pix_transaction.repository;
 
-import com.camilachangperes.process_pix_transaction.entity.Transaction;
+import com.camilachangperes.process_pix_transaction.model.Transaction;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

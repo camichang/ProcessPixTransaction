@@ -32,4 +32,9 @@ public class PixTransactionRequest {
         this.amount = amount;
     }
 
+    public PixTransactionRequest(String pixKey, BigDecimal amount) {
+        this.pixKey = pixKey;
+        this.amount = amount;
+    }
+
 }

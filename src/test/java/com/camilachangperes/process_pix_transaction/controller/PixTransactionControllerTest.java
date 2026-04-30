@@ -1,29 +1,30 @@
 package com.camilachangperes.process_pix_transaction.controller;
 
-import com.camilachangperes.process_pix_transaction.dto.PixTransactionRequest;
-import com.camilachangperes.process_pix_transaction.model.StatusTransaction;
-import com.camilachangperes.process_pix_transaction.model.Transaction;
+import com.camilachangperes.process_pix_transaction.repository.IdempotencyRepository;
+import com.camilachangperes.process_pix_transaction.repository.TransactionRepository;
 import com.camilachangperes.process_pix_transaction.service.PixTransactionService;
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 
-import java.util.UUID;
-
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.core.IsEqual.equalTo;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class PixTransactionControllerTest {
 
-    @Mock
+    @Autowired
     private PixTransactionService pixTransactionService;
+
+    @Autowired
+    private TransactionRepository transactionRepository;
+
+    @Autowired
+    private IdempotencyRepository idempotencyRepository;
 
     @LocalServerPort
     int port;
@@ -31,13 +32,16 @@ class PixTransactionControllerTest {
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
+
+        transactionRepository.deleteAll();
+        idempotencyRepository.deleteAll();
     }
 
     @Test
     void deveCriarTransacaoComBadRequest() {
         given()
                 .contentType("application/json")
-                .header("idempotency_key", "key123")
+                .header("idempotency_key", "key1234")
                 .body("{\"pixKey\":\"chave@teste.com\",\"amount\":100}")
         .when()
                 .post("/pix/pay")
@@ -49,33 +53,27 @@ class PixTransactionControllerTest {
 
     @Test
     void deveCriarTransacaoComSucesso() {
-        Transaction transaction = new Transaction();
-        transaction.setId(UUID.randomUUID().toString());
-        transaction.setPixKey("chave@teste.com");
-        transaction.setAmount(100L);
-        transaction.setStatus(StatusTransaction.APPROVED);
-
-        when(pixTransactionService.createdTransaction(any(PixTransactionRequest.class), eq("key123")))
-                .thenReturn(transaction);
+        String pixKey = "123456789ab";
+        long amount = 100;
 
         given()
                 .contentType("application/json")
-                .header("idempotency_key", "key123")
-                .body("{\"pixKey\":\"chave@teste.com\",\"amount\":100}")
+                .header("idempotency_key", "key125")
+                .body("{\"pixKey\":\"123456789ab\",\"amount\":100}")
         .when()
                 .post("/pix/pay")
         .then()
                 .statusCode(200)
-                .body("pixKey", equalTo("chave@teste.com"))
+                .body("pixKey", equalTo(pixKey))
                 .body("amount", equalTo(100))
-                .body("message", equalTo("Pix transaction processed successfully: pixKey: chave@teste.com, amount: 100"));
+                .body("message", equalTo("Pix transaction processed successfully: pixKey: " + pixKey + ", amount: " + amount));
     }
 
     @Test
     void deveRetornarBadRequestComPayloadInvalido() {
         given()
                 .contentType("application/json")
-        .header("idempotency_key", "key123")
+        .header("idempotency_key", "key127")
                 .body("{\"amount\":100}")
         .when()
                 .post("/pix/pay")
@@ -96,34 +94,29 @@ class PixTransactionControllerTest {
 
     @Test
     void deveRetornarMesmaTransacaoQuandoIdempotenciaKeyForDuplicada() {
-        Transaction transaction = new Transaction();
-        transaction.setId(UUID.randomUUID().toString());
-        transaction.setPixKey("chave@teste.com");
-        transaction.setAmount(100L);
-        transaction.setStatus(StatusTransaction.APPROVED);
-
-        when(pixTransactionService.createdTransaction(any(PixTransactionRequest.class), eq("key123")))
-                .thenReturn(transaction);
-
-        given()
+        String firstId = given()
                 .contentType("application/json")
                 .header("idempotency_key", "key123")
-                .body("{\"pixKey\":\"chave@teste.com\",\"amount\":100}")
+                .body("{\"pixKey\":\"123456789ab\",\"amount\":100}")
         .when()
                 .post("/pix/pay")
         .then()
                 .statusCode(200)
-                .body("id", equalTo(transaction.getId()));
+                .extract()
+                .path("id");
 
         // Segunda chamada com mesma chave
-        given()
+        String secondId = given()
                 .contentType("application/json")
                 .header("idempotency_key", "key123")
-                .body("{\"pixKey\":\"chave@teste.com\",\"amount\":100}")
+                .body("{\"pixKey\":\"123456789ab\",\"amount\":100}")
         .when()
                 .post("/pix/pay")
         .then()
                 .statusCode(200)
-                .body("id", equalTo(transaction.getId()));
+                .extract()
+                .path("id");
+
+        assertEquals(firstId, secondId, "Transações devem ser iguais para a mesma chave de idempotência");
     }
 }

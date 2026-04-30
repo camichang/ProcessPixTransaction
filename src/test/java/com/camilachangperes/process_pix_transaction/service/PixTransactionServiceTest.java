@@ -94,7 +94,7 @@ public class PixTransactionServiceTest {
         assertNotNull(result.getId());
 
         verify(transactionRepository).save(any(Transaction.class));
-        verify(eventPublisher).publishEvent(any());
+        verify(eventPublisher, times(1)).publishEvent(any(TransactionCreatedEvent.class));
     }
 
     @Test
@@ -127,8 +127,4 @@ public class PixTransactionServiceTest {
         verify(transactionRepository).save(any(Transaction.class));
         verify(eventPublisher, times(1)).publishEvent(any(TransactionCreatedEvent.class));
     }
-
-
 }
-
-

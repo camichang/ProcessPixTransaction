@@ -5,10 +5,10 @@ import com.camilachangperes.process_pix_transaction.model.StatusTransaction;
 import com.camilachangperes.process_pix_transaction.model.Transaction;
 import com.camilachangperes.process_pix_transaction.repository.TransactionRepository;
 import com.camilachangperes.process_pix_transaction.service.FraudService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.mockito.ArgumentCaptor;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 
@@ -16,79 +16,88 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class TransactionCreatedListenerTest {
-    @Mock
-    private FraudService fraudService;
 
-    @Mock
     private TransactionRepository transactionRepository;
-
-    @Mock
+    private FraudService fraudService;
     private ApplicationEventPublisher eventPublisher;
-
-    @InjectMocks
+    private CentralBankMock centralBankMock;
     private TransactionCreatedListener listener;
 
-    @Test
-    void deveReprovarTransacaoQuandoFraudeDetectada() {
-        // dado um evento inicial
-        String id = UUID.randomUUID().toString();
-        TransactionCreatedEvent event = new TransactionCreatedEvent(id, "chave@teste.com", 100L, StatusTransaction.PENDING);
+    @BeforeEach
+    void setUp() {
+        transactionRepository = mock(TransactionRepository.class);
+        fraudService = mock(FraudService.class);
+        eventPublisher = mock(ApplicationEventPublisher.class);
+        centralBankMock = mock(CentralBankMock.class);
 
-        Transaction transaction = new Transaction();
-        transaction.setId(id);
-        transaction.setPixKey(event.pixKey());
-        transaction.setAmount(event.amount());
-        transaction.setStatus(StatusTransaction.PENDING);
-
-        when(transactionRepository.findById(id)).thenReturn(Optional.of(transaction));
-        when(transactionRepository.save(any(Transaction.class))).thenAnswer(invocation ->{
-            Transaction t = invocation.getArgument(0);
-            t.setId(id);
-            return t;
-        });
-        when(fraudService.isApproved(event.amount())).thenReturn(false);
-
-        // quando o listener processa
-        listener.handleTransactionCreatedEvent(event);
-
-        // então a transação deve ser salva com status REPROVED_FRAUD
-        assertEquals(StatusTransaction.REPROVED_FRAUD, transaction.getStatus());
-
-        verify(transactionRepository).save(transaction);
-        verify(eventPublisher).publishEvent(any(TransactionResponseEvent.class)); // e o evento atualizado deve ser publicado
+        listener = new TransactionCreatedListener(transactionRepository, centralBankMock);
     }
 
-
     @Test
-    void deveAprovarTransacaoQuandoFraudeNaoDetectada() {
+    void deveEnviarEventoAoBancoCentralQuandoTransacaoEncontrada() {
         String id = UUID.randomUUID().toString();
-        TransactionCreatedEvent event = new TransactionCreatedEvent(id, "chave@teste.com",50L, StatusTransaction.PENDING);
-
         Transaction transaction = new Transaction();
         transaction.setId(id);
-        transaction.setPixKey(event.pixKey());
-        transaction.setAmount(event.amount());
-        transaction.setStatus(StatusTransaction.PENDING);
+        transaction.setPixKey("chave@teste.com");
+        transaction.setAmount(100L);
+        transaction.setStatus(StatusTransaction.APPROVED);
+
+        TransactionCreatedEvent event = new TransactionCreatedEvent(
+                id, transaction.getPixKey(), transaction.getAmount(), transaction.getStatus()
+        );
 
         when(transactionRepository.findById(id)).thenReturn(Optional.of(transaction));
-        when(transactionRepository.save(any(Transaction.class))).thenAnswer(invocation ->{
-            Transaction t = invocation.getArgument(0);
-            t.setId(id);
-            return t;
-        });
-        when(fraudService.isApproved(event.amount())).thenReturn(true);
 
         listener.handleTransactionCreatedEvent(event);
 
-        assertEquals(StatusTransaction.APPROVED, transaction.getStatus());
-        verify(transactionRepository).save(transaction);
-        verify(eventPublisher).publishEvent(any(TransactionEvent.class));
+        verify(centralBankMock).send(any(TransactionResponseEvent.class));
     }
+
+    @Test
+    void deveLancarExcecaoQuandoTransacaoNaoEncontrada() {
+        String id = UUID.randomUUID().toString();
+        TransactionCreatedEvent event = new TransactionCreatedEvent(
+                id,
+                "chave@teste.com",
+                50L,
+                StatusTransaction.PENDING);
+
+        when(transactionRepository.findById(id)).thenReturn(Optional.empty());
+
+        assertThrows(IllegalArgumentException.class, () -> listener.handleTransactionCreatedEvent(event));
+    }
+
+    @Test
+    void deveEnviarEventoComDadosCorretos() {
+        String id = UUID.randomUUID().toString();
+        Transaction transaction = new Transaction();
+        transaction.setId(id);
+        transaction.setPixKey("chave@teste.com");
+        transaction.setAmount(200L);
+        transaction.setStatus(StatusTransaction.REPROVED);
+
+        when(transactionRepository.findById(id)).thenReturn(Optional.of(transaction));
+
+        TransactionCreatedEvent event = new TransactionCreatedEvent(id, transaction.getPixKey(), transaction.getAmount(), transaction.getStatus());
+
+        listener.handleTransactionCreatedEvent(event);
+
+        ArgumentCaptor<TransactionResponseEvent> captor = ArgumentCaptor.forClass(TransactionResponseEvent.class);
+        verify(centralBankMock).send(captor.capture());
+
+        TransactionResponseEvent response = captor.getValue();
+        assertEquals(transaction.getId(), response.id());
+        assertEquals(transaction.getPixKey(), response.pixKey());
+        assertEquals(transaction.getAmount(), response.amount());
+        assertEquals(transaction.getStatus(), response.status());
+    }
+
+
 }
 

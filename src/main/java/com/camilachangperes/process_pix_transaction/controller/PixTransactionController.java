@@ -32,7 +32,7 @@ public class PixTransactionController {
                     transaction.getId(),
                     transaction.getPixKey(),
                     transaction.getAmount(),
-                    "Pix transaction reproved: pixKey: " + transaction.getPixKey() + ", amount: " + transaction.getAmount()
+                    "Transaction was rejected. Please check your account status or contact support. "
             );
             return ResponseEntity.badRequest().body(dto);
         }

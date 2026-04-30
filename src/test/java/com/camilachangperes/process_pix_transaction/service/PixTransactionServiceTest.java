@@ -1,7 +1,7 @@
 package com.camilachangperes.process_pix_transaction.service;
 
 import com.camilachangperes.process_pix_transaction.dto.PixTransactionRequest;
-import com.camilachangperes.process_pix_transaction.event.TransactionEvent;
+import com.camilachangperes.process_pix_transaction.event.TransactionCreatedEvent;
 import com.camilachangperes.process_pix_transaction.model.StatusTransaction;
 import com.camilachangperes.process_pix_transaction.model.Transaction;
 import com.camilachangperes.process_pix_transaction.repository.IdempotencyRepository;
@@ -14,84 +14,87 @@ import org.springframework.context.ApplicationEventPublisher;
 
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 public class PixTransactionServiceTest {
     private TransactionRepository transactionRepository;
+    private PixTransactionValidator pixTransactionValidator;
     private AccountService accountService;
     private ApplicationEventPublisher eventPublisher;
+    private IdempotencyRepository idempotencyRepository;
     private PixTransactionService pixTransactionService;
+    private FraudService fraudService;
 
     @BeforeEach
     void setUp() {
         transactionRepository = mock(TransactionRepository.class);
-        PixTransactionValidator pixTransactionValidator = mock(PixTransactionValidator.class);
+        pixTransactionValidator = mock(PixTransactionValidator.class);
         accountService = mock(AccountService.class);
         eventPublisher = mock(ApplicationEventPublisher.class);
-        IdempotencyRepository idempotencyRepository = mock(IdempotencyRepository.class);
+        idempotencyRepository = mock(IdempotencyRepository.class);
+        fraudService = mock(FraudService.class);
 
         pixTransactionService = new PixTransactionService(
                 transactionRepository,
                 pixTransactionValidator,
                 accountService,
                 eventPublisher,
-                idempotencyRepository
+                idempotencyRepository,
+                fraudService
         );
     }
 
     @Test
     void deveReprovarTransacaoQuandoContaBloqueadaESalvarNoBanco() {
         PixTransactionRequest request = new PixTransactionRequest("chave2@banco.com",100L);
+        String idempotencyKey = "key12345";
 
         when(accountService.hasSufficientBalance(request.getPixKey(), request.getAmount())).thenReturn(true);
         when(accountService.isAccountBlocked(request.getPixKey())).thenReturn(true);
+        when(transactionRepository.save(any(Transaction.class)))
+                .thenAnswer(invocation -> {
+                    Transaction t = invocation.getArgument(0);
+                    t.setId(UUID.randomUUID().toString());
+                    return t;
+                });
 
-        Transaction result = pixTransactionService.createdTransaction((request));
+        Transaction result = pixTransactionService.createdTransaction(request, idempotencyKey);
 
-        assertEquals("REPROVED", result.getStatus());
-
-        verify(transactionRepository).save(any(Transaction.class));
-    }
-
-    @Test
-    void deveReprovarTransacaoQuandoSaldoIndisponivel() {
-        PixTransactionRequest request = new PixTransactionRequest("chave2@banco.com", 100L);
-
-        when(accountService.hasSufficientBalance(request.getPixKey(), request.getAmount())).thenReturn(false);
-        when(accountService.isAccountBlocked(request.getPixKey())).thenReturn(false);
-
-        Transaction result = pixTransactionService.createdTransaction((request));
-
-        assertEquals("REPROVED", result.getStatus().toString());
+        assertEquals(StatusTransaction.REPROVED_ACCOUNT_BLOCKED, result.getStatus());
+        assertEquals(request.getPixKey(), result.getPixKey());
+        assertNotNull(result.getId());
 
         verify(transactionRepository).save(any(Transaction.class));
-
     }
 
     @Test
     void deveCriarTransacaoQuandoSaldoSuficienteEContaNaoBloqueada() {
         PixTransactionRequest request = new PixTransactionRequest("chave3@banco.com", 50L);
 
+        String idempotencyKey = "key12345";
+
         when(accountService.hasSufficientBalance(request.getPixKey(), request.getAmount())).thenReturn(true);
         when(accountService.isAccountBlocked(request.getPixKey())).thenReturn(false);
+        when(transactionRepository.save(any(Transaction.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+        when(fraudService.isApproved(request.getAmount())).thenReturn(true);
 
-        Transaction transaction = new Transaction();
-        transaction.setId(UUID.randomUUID().toString());
-        transaction.setPixKey(request.getPixKey());
-        transaction.setAmount(request.getAmount());
-        transaction.setStatus(StatusTransaction.PENDING);
+        when(transactionRepository.save(any(Transaction.class)))
+                .thenAnswer(invocation -> {
+                    Transaction t = invocation.getArgument(0);
+                    t.setId(UUID.randomUUID().toString());
+                    return t;
+                });
 
-        when(transactionRepository.save(any(Transaction.class))).thenReturn(transaction);
+        Transaction result = pixTransactionService.createdTransaction(request, idempotencyKey);
 
-        Transaction result = pixTransactionService.createdTransaction(request);
-
-        assertEquals(StatusTransaction.PENDING, result.getStatus());
+        assertEquals(StatusTransaction.APPROVED, result.getStatus());
         assertEquals(request.getPixKey(), result.getPixKey());
+        assertNotNull(result.getId());
 
         verify(transactionRepository).save(any(Transaction.class));
-        verify(eventPublisher, times(1)).publishEvent(any(TransactionEvent.class));
+        verify(eventPublisher, times(1)).publishEvent(any(TransactionCreatedEvent.class));
     }
 
     @Test
@@ -99,6 +102,7 @@ public class PixTransactionServiceTest {
         LogCaptor logCaptor = LogCaptor.forClass(PixTransactionService.class);
 
         PixTransactionRequest request = new PixTransactionRequest("chave3@banco.com", 50L);
+        String idempotencyKey = UUID.randomUUID().toString();
 
         when(accountService.hasSufficientBalance(request.getPixKey(), request.getAmount())).thenReturn(false);
         when(accountService.isAccountBlocked(request.getPixKey())).thenReturn(false);
@@ -109,9 +113,10 @@ public class PixTransactionServiceTest {
         transaction.setAmount(request.getAmount());
         transaction.setStatus(StatusTransaction.PENDING);
 
-        when(transactionRepository.save(any(Transaction.class))).thenReturn(transaction);
+        when(transactionRepository.save(any(Transaction.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
-        Transaction result = pixTransactionService.createdTransaction(request);
+        Transaction result = pixTransactionService.createdTransaction(request, idempotencyKey);
 
         assertEquals(StatusTransaction.REPROVED, result.getStatus());
         assertEquals(request.getPixKey(), result.getPixKey());
@@ -120,10 +125,6 @@ public class PixTransactionServiceTest {
                 .anyMatch(msg -> msg.contains("Insufficient balance")));
 
         verify(transactionRepository).save(any(Transaction.class));
-        verify(eventPublisher, times(1)).publishEvent(any(TransactionEvent.class));
+        verify(eventPublisher, times(1)).publishEvent(any(TransactionCreatedEvent.class));
     }
-
-
 }
-
-

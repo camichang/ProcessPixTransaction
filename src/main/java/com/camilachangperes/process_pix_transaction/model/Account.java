@@ -1,33 +1,30 @@
 package com.camilachangperes.process_pix_transaction.model;
 
-import java.math.BigDecimal;
-import java.util.UUID;
-
 public class Account {
 
-    private UUID id;
-    private BigDecimal balance;
+    private String id;
+    private Long balance;
     private boolean blocked;
 
-    public Account(UUID id, BigDecimal balance, boolean blocked) {
+    public Account(String id, Long balance, boolean blocked) {
         this.id = id;
         this.balance = balance;
         this.blocked = blocked;
     }
 
-    public UUID getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(UUID id) {
+    public void setId(String id) {
         this.id = id;
     }
 
-    public BigDecimal getBalance() {
+    public Long getBalance() {
         return balance;
     }
 
-    public void setBalance(BigDecimal balance) {
+    public void setBalance(Long balance) {
         this.balance = balance;
     }
 

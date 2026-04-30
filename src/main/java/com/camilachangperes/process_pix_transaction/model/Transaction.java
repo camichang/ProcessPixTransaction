@@ -2,21 +2,19 @@ package com.camilachangperes.process_pix_transaction.model;
 
 import jakarta.persistence.*;
 
-import java.util.UUID;
-
 @Entity
 public class Transaction {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id", nullable = false)
-    private UUID id;
+    private String id;
 
     @Column(name = "pix_key", nullable = false)
     private String pixKey;
 
     @Column(name = "amount", nullable = false)
-    private String amount;
+    private Long amount;
 
     @Column(name = "status", nullable = false)
     private StatusTransaction status;
@@ -32,11 +30,11 @@ public class Transaction {
         this.status = status;
     }
 
-    public String getAmount() {
+    public Long getAmount() {
         return amount;
     }
 
-    public void setAmount(String amount) {
+    public void setAmount(Long amount) {
         this.amount = amount;
     }
 
@@ -48,11 +46,11 @@ public class Transaction {
         this.pixKey = pixKey;
     }
 
-    public UUID getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(UUID id) {
+    public void setId(String id) {
         this.id = id;
     }
 }

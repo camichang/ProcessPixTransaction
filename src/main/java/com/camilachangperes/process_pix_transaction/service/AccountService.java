@@ -3,9 +3,9 @@ package com.camilachangperes.process_pix_transaction.service;
 import com.camilachangperes.process_pix_transaction.model.Account;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 public class AccountService {
@@ -14,16 +14,16 @@ public class AccountService {
 
     public AccountService() {
         // contas simuladas para teste
-        accounts.put("teste1@teste.com", new Account(java.util.UUID.randomUUID(), new BigDecimal("30000.00"), false));
-        accounts.put("123456789ab", new Account(java.util.UUID.randomUUID(), new BigDecimal("500.00"), false));
-        accounts.put("pixKey3", new Account(java.util.UUID.randomUUID(), new BigDecimal("200.00"), true)); // conta bloqueada
+        accounts.put("teste1@teste.com", new Account(UUID.randomUUID().toString(), 30000L, false));
+        accounts.put("123456789ab", new Account(UUID.randomUUID().toString(), 500L, false));
+        accounts.put("pixKey3", new Account(UUID.randomUUID().toString(), 200L, true)); // conta bloqueada
     }
 
     //verifica se tem saldo suficiente
-    public boolean hasSufficientBalance(String pixKey, BigDecimal amount) {
+    public boolean hasSufficientBalance(String pixKey, Long amount) {
         Account account = accounts.get(pixKey);
         return account != null
-                && amount.compareTo(BigDecimal.ZERO) > 0
+                && amount.compareTo(0L) > 0
                 && account.getBalance().compareTo(amount) >= 0;
     }
 

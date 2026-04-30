@@ -7,22 +7,18 @@ import com.camilachangperes.process_pix_transaction.repository.TransactionReposi
 import com.camilachangperes.process_pix_transaction.service.FraudService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.slf4j.Logger;
 import org.springframework.context.ApplicationEventPublisher;
 
-import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.contains;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class TransactionCreatedListenerTest {
@@ -38,22 +34,16 @@ public class TransactionCreatedListenerTest {
     @InjectMocks
     private TransactionCreatedListener listener;
 
-    @Mock
-    private CentralBankMock centralBankMock;
-
-    @Mock
-    private Logger logger;
-
     @Test
     void deveReprovarTransacaoQuandoFraudeDetectada() {
         // dado um evento inicial
-        UUID id = UUID.randomUUID();
-        TransactionCreatedEvent event = new TransactionCreatedEvent(id, "chave@teste.com", new BigDecimal("100.00"), StatusTransaction.PENDING);
+        String id = UUID.randomUUID().toString();
+        TransactionCreatedEvent event = new TransactionCreatedEvent(id, "chave@teste.com", 100L, StatusTransaction.PENDING);
 
         Transaction transaction = new Transaction();
         transaction.setId(id);
         transaction.setPixKey(event.pixKey());
-        transaction.setAmount(event.amount().toString());
+        transaction.setAmount(event.amount());
         transaction.setStatus(StatusTransaction.PENDING);
 
         when(transactionRepository.findById(id)).thenReturn(Optional.of(transaction));
@@ -77,13 +67,13 @@ public class TransactionCreatedListenerTest {
 
     @Test
     void deveAprovarTransacaoQuandoFraudeNaoDetectada() {
-        UUID id = UUID.randomUUID();
-        TransactionCreatedEvent event = new TransactionCreatedEvent(id, "chave@teste.com", new BigDecimal("50.00"), StatusTransaction.PENDING);
+        String id = UUID.randomUUID().toString();
+        TransactionCreatedEvent event = new TransactionCreatedEvent(id, "chave@teste.com",50L, StatusTransaction.PENDING);
 
         Transaction transaction = new Transaction();
         transaction.setId(id);
         transaction.setPixKey(event.pixKey());
-        transaction.setAmount(event.amount().toString());
+        transaction.setAmount(event.amount());
         transaction.setStatus(StatusTransaction.PENDING);
 
         when(transactionRepository.findById(id)).thenReturn(Optional.of(transaction));

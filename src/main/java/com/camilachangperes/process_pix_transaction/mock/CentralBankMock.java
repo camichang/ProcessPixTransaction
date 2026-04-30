@@ -5,8 +5,6 @@ import com.camilachangperes.process_pix_transaction.model.StatusTransaction;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
-
 @Component
 public class CentralBankMock {
 
@@ -20,7 +18,7 @@ public class CentralBankMock {
         StatusTransaction bankStatus = event.status();
 
         if (bankStatus == StatusTransaction.PENDING){
-            bankStatus = event.amount().compareTo(new BigDecimal("1000")) > 0
+            bankStatus = event.amount() > 1000
                     ? StatusTransaction.REPROVED
                     : StatusTransaction.APPROVED;
         }

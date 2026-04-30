@@ -2,14 +2,11 @@ package com.camilachangperes.process_pix_transaction.event;
 
 import com.camilachangperes.process_pix_transaction.model.StatusTransaction;
 
-import java.math.BigDecimal;
-import java.util.UUID;
-
 public class TransactionEvent {
 
-    private UUID id;
+    private String id;
     private String pixKey;
-    private BigDecimal amount;
+    private Long amount;
     private StatusTransaction status;
 
     public String getPixKey() {
@@ -20,19 +17,19 @@ public class TransactionEvent {
         this.pixKey = pixKey;
     }
 
-    public UUID getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(UUID id) {
+    public void setId(String id) {
         this.id = id;
     }
 
-    public BigDecimal getAmount() {
+    public Long getAmount() {
         return amount;
     }
 
-    public void setAmount(BigDecimal amount) {
+    public void setAmount(Long amount) {
         this.amount = amount;
     }
 
@@ -44,7 +41,7 @@ public class TransactionEvent {
         this.status = status;
     }
 
-    public TransactionEvent(UUID id, String pixKey, BigDecimal amount, StatusTransaction status) {
+    public TransactionEvent(String id, String pixKey, Long amount, StatusTransaction status) {
         this.id = id;
         this.pixKey = pixKey;
         this.amount = amount;

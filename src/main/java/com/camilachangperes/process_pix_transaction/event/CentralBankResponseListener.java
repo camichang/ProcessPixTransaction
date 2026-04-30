@@ -1,7 +1,6 @@
 package com.camilachangperes.process_pix_transaction.event;
 
 import com.camilachangperes.process_pix_transaction.dto.ClientTransactionStatusDTO;
-import com.camilachangperes.process_pix_transaction.dto.TransactionStatusDTO;
 import com.camilachangperes.process_pix_transaction.model.StatusTransaction;
 import com.camilachangperes.process_pix_transaction.model.Transaction;
 import com.camilachangperes.process_pix_transaction.repository.TransactionRepository;
@@ -32,16 +31,13 @@ public class CentralBankResponseListener {
             transaction.setStatus(event.status());
             Transaction saved = transactionRepository.save(transaction);
 
-            StatusTransaction clientStatus;
             String message;
 
             if (saved.getStatus() == StatusTransaction.REPROVED_ACCOUNT_BLOCKED
                     || saved.getStatus() == StatusTransaction.REPROVED_FRAUD
                     || saved.getStatus() == StatusTransaction.REPROVED) {
-                clientStatus = StatusTransaction.REPROVED;
                 message = "Transaction was rejected. Please check your account status or contact support.";
             } else {
-                clientStatus = StatusTransaction.APPROVED;
                 message = "Transaction was successful.";
             }
 
@@ -54,8 +50,7 @@ public class CentralBankResponseListener {
                     message
                     ));
 
-            System.out.println("Central Bank response processed: "
-                    + saved.getId() + ", Status: " + saved.getStatus());
+            logger.info("Central Bank response processed: {}, Status: {}", saved.getId(), saved.getStatus());
         });
     }
 }

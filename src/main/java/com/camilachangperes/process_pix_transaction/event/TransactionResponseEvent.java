@@ -2,12 +2,9 @@ package com.camilachangperes.process_pix_transaction.event;
 
 import com.camilachangperes.process_pix_transaction.model.StatusTransaction;
 
-import java.math.BigDecimal;
-import java.util.UUID;
-
 public record TransactionResponseEvent (
-        UUID id,
+        String id,
         String pixKey,
-        BigDecimal amount,
+        Long amount,
         StatusTransaction status
 ){}

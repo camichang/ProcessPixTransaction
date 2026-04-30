@@ -4,8 +4,6 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 
-import java.math.BigDecimal;
-
 public class PixTransactionRequest {
 
     @NotNull
@@ -14,7 +12,12 @@ public class PixTransactionRequest {
 
     @NotNull
     @Positive
-    private BigDecimal amount;
+    private Long amount;
+
+    public PixTransactionRequest(String pixKey, Long amount) {
+        this.pixKey = pixKey;
+        this.amount = amount;
+    }
 
     public String getPixKey() {
         return pixKey;
@@ -24,17 +27,14 @@ public class PixTransactionRequest {
         this.pixKey = pixKey;
     }
 
-    public BigDecimal getAmount() {
+    public Long getAmount() {
         return amount;
     }
 
-    public void setAmount(BigDecimal amount) {
+    public void setAmount(Long amount) {
         this.amount = amount;
     }
 
-    public PixTransactionRequest(String pixKey, BigDecimal amount) {
-        this.pixKey = pixKey;
-        this.amount = amount;
-    }
+
 
 }

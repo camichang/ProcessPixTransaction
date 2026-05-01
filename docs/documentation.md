@@ -62,11 +62,14 @@ O objetivo é validar cenários de aprovação e reprovação e notificar o clie
 ## 5. API
 ### Endpoint: `POST /pay`
 **Request:**
-```json
-{
-  "pixKey": "pixKey1",
-  "amount": 500
-}
+```
+curl -X POST http://localhost:8080/pay \
+-H "Content-Type: application/json" \
+-H "idempotency_key: key125" \
+-d '{
+"pixKey": "pixKey1",
+"amount": 500
+}'
 ```
 **Response: Approved**
 ```json
@@ -115,8 +118,8 @@ O objetivo é validar cenários de aprovação e reprovação e notificar o clie
 ---
 ## 7. Testes Unitários e de Integração
 - **Testes Unitários**: Cobrem a lógica de negócios em `PixTransactionService` e `FraudService`.
-- **Testes de Integração**: Validam o fluxo completo da transação, incluindo a interação com o mock do Banco Central e as notificações WebSocket.
-- **Ferramentas**: JUnit 5, Mockito, Spring Boot Test.
+- **Testes de Integração**: Validam o fluxo completo da transação, incluindo a interação com o mock do Banco Central.
+- **Ferramentas**: JUnit 5, Mockito, Spring Boot Test, AssertJ
 - **Execução**: Os testes podem ser executados usando o comando:
 ```bash
 ./gradlew test
@@ -127,3 +130,7 @@ O objetivo é validar cenários de aprovação e reprovação e notificar o clie
 Este projeto é uma simulação de um sistema de processamento de transações Pix, focado em a validação de regras de negócio e integração com serviços externos. 
 Ele pode ser expandido para incluir funcionalidades adicionais, como autenticação, suporte a múltiplas chaves Pix, e integração com sistemas de pagamento reais. 
 A estrutura modular e o uso de eventos facilitam a manutenção e a escalabilidade do sistema.
+
+---
+## 9. Métricas New Relic
+- Para enviar métricas ao New Relic, crie docs/secrets.yaml com a chave ou defina a variável de ambiente NEW_RELIC_API_KEY

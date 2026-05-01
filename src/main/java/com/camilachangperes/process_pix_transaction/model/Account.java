@@ -2,11 +2,15 @@ package com.camilachangperes.process_pix_transaction.model;
 
 public class Account {
 
+    private String pixKey;
     private String id;
     private Long balance;
     private boolean blocked;
 
-    public Account(String id, Long balance, boolean blocked) {
+    public Account() {}
+
+    public Account(String pixKey, String id, Long balance, boolean blocked) {
+        this.pixKey = pixKey;
         this.id = id;
         this.balance = balance;
         this.blocked = blocked;
@@ -34,6 +38,14 @@ public class Account {
 
     public void setBlocked(boolean blocked) {
         this.blocked = blocked;
+    }
+
+    public String getPixKey() {
+        return pixKey;
+    }
+
+    public void setPixKey(String pixKey) {
+        this.pixKey = pixKey;
     }
 
 

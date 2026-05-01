@@ -13,12 +13,31 @@ spring:
   h2:
     console:
       enabled: true
+  websocket:
+    enabled: true
+    messaging:
+      broker:
+        relay:
+          enabled: false
+  config:
+    import: optional:file:docs/secrets.yaml
 
-websocket:
-  enabled: true
-  messaging:
-    broker:
-      relay:
-        enabled: false
+otel:
+  service:
+    name: process-pix-transaction
+  exporter:
+    otlp:
+      endpoint: https://otlp.nr-data.net:4317
+      headers:
+        api-key: ${NEW_RELIC_API_KEY:dummy}
+  resource:
+    attributes:
+      deployment.environment: test
+      service.namespace: pix
+
+management:
+  tracing:
+    enabled: true
+
 
 

@@ -4,8 +4,10 @@ import com.camilachangperes.process_pix_transaction.model.Account;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.UUID;
+
+import static com.camilachangperes.process_pix_transaction.utils.AccountUtils.loadAccountsFromFile;
 
 @Service
 public class AccountService {
@@ -13,10 +15,10 @@ public class AccountService {
     private final Map<String, Account> accounts = new HashMap<>();
 
     public AccountService() {
-        // contas simuladas para teste
-        accounts.put("teste1@teste.com", new Account(UUID.randomUUID().toString(), 30000L, false));
-        accounts.put("123456789ab", new Account(UUID.randomUUID().toString(), 500L, false));
-        accounts.put("pixKey3", new Account(UUID.randomUUID().toString(), 200L, true)); // conta bloqueada
+        List<Account> loadedAccounts = loadAccountsFromFile("accounts.json");
+        for (Account account : loadedAccounts){
+            accounts.put(account.getPixKey(), account);
+        }
     }
 
     //verifica se tem saldo suficiente

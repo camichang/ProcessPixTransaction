@@ -11,10 +11,16 @@
       "name": "Request - chavepix2",
       "request": {
         "method": "POST",
-        "header": [],
+        "header": [
+          {
+            "key": "idempotency_key",
+            "value": "234rdssa",
+            "type": "text"
+          }
+        ],
         "body": {
           "mode": "raw",
-          "raw": "{\r\n    \"pixKey\": \"teste1@teste.com\",\r\n    \"amount\": \"100.00\"\r\n}",
+          "raw": "{\r\n    \"pixKey\": \"teste1@teste.com\",\r\n    \"amount\": \"100\"\r\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -40,10 +46,16 @@
       "name": "Request - chavepix1",
       "request": {
         "method": "POST",
-        "header": [],
+        "header": [
+          {
+            "key": "idempotency_key",
+            "value": "12345test",
+            "type": "text"
+          }
+        ],
         "body": {
           "mode": "raw",
-          "raw": "{\r\n    \"pixKey\": \"teste1@teste.com\",\r\n    \"amount\": \"10.00\"\r\n}",
+          "raw": "{\r\n    \"pixKey\": \"teste1@teste.com\",\r\n    \"amount\": \"10\"\r\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -69,10 +81,16 @@
       "name": "Request - chavepix3 conta bloqueada",
       "request": {
         "method": "POST",
-        "header": [],
+        "header": [
+          {
+            "key": "idempotency_key",
+            "value": "teste123",
+            "type": "text"
+          }
+        ],
         "body": {
           "mode": "raw",
-          "raw": "{\r\n    \"pixKey\": \"teste1@teste.com\",\r\n    \"amount\": \"10.00\"\r\n}",
+          "raw": "{\r\n    \"pixKey\": \"teste1@teste.com\",\r\n    \"amount\": \"100\"\r\n}",
           "options": {
             "raw": {
               "language": "json"

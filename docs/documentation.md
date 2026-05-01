@@ -10,12 +10,14 @@ O objetivo é validar cenários de aprovação e reprovação e notificar o clie
 1. Cliente envia requisição `POST /pix/pay`.
 2. Transação criada com status `PENDING`.
 3. Evento `TransactionCreatedEvent` é disparado.
-4. `TransactionCreatedListener` processa:
-   - Chama serviço de fraude (se aplicável).
-   - Atualiza status no banco.
+   - Chama serviço de fraude (sincrono).
+4. Salva a transação no banco de dados.
+5. Sistema dispara um evento de transação.
+6. `TransactionCreatedListener` processa:
+   - Verifica se existe no banco.
    - Envia mensagem para fila do Banco Central.
-5. Banco Central (mock) processa e responde.
-6. `CentralBankResponseListener` atualiza status no banco e envia notificação para o cliente via `/topic/pix-status`.
+7. Banco Central (mock) processa e responde.
+8. `CentralBankResponseListener` atualiza status no banco e envia notificação para o cliente via `/topic/pix-status`.
 
 ---
 ```
@@ -23,6 +25,7 @@ O objetivo é validar cenários de aprovação e reprovação e notificar o clie
 - **Conta bloqueada** → `REPROVED_ACCOUNT_BLOCKED` (interno), cliente recebe `REPROVED`.
 - **Saldo insuficiente** → `REPROVED` (interno), cliente recebe `REPROVED`.
 - **Valor acima de 10 mil** → `REPROVED` (interno), cliente recebe `REPROVED`.
+- **Reprovada por Fraude** -> `REPROVED_FRAUD` (interno), cliente recebe `REPROVED`.
 - **Cenário feliz** → `APPROVED`.
 
 ---
@@ -31,7 +34,6 @@ O objetivo é validar cenários de aprovação e reprovação e notificar o clie
 - **Linguagem**: Java 21
 - **Framework**: Spring Boot
 - **Eventos**:  
-  - `CentralBankResponseEvent`  
   - `TransactionCreatedEvent`
   - `TransactionResponseEvent`
 - **DTOs**:  
@@ -52,10 +54,12 @@ O objetivo é validar cenários de aprovação e reprovação e notificar o clie
   - H2 (em memória) para armazenar transações e status.
 - **Repositórios**:  
   - `TransactionRepository` (CRUD para transações)
+  - `IdempotencyRepository` (Armazena as chaves de idempotencia)
 - **Controllers**:  
   - `PixTransactionController`
 - **Migrações**:  
   - `V1__Create_Transaction_Table.sql` (criação da tabela de transações)
+  - `V2__Create_Idempotency_Table.sql` (criação da tabela de idempotencia)
 
 ---
 
@@ -110,7 +114,7 @@ curl -X POST http://localhost:8080/pay \
   "id": "abc123",
   "pixKey": "pixKey1",
   "amount": 500,
-  "message": "Transaction was successful."
+  "message": "Pix transaction processed successfully: pixKey: pixkey1, amount: 500"
 }
 ```
 - **Uso**: O cliente pode se inscrever neste tópico para receber atualizações em tempo real sobre o status de suas transações Pix.
@@ -134,3 +138,4 @@ A estrutura modular e o uso de eventos facilitam a manutenção e a escalabilida
 ---
 ## 9. Métricas New Relic
 - Para enviar métricas ao New Relic, crie docs/secrets.yaml com a chave ou defina a variável de ambiente NEW_RELIC_API_KEY
+- As configurações do dashboard estão na pasta docs.
